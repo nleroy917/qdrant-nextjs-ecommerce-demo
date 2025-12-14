@@ -60,9 +60,6 @@ export async function POST(request: NextRequest) {
     const sparseIndices = sparseEmbedding[0].map((v) => v.tokenId)
     const sparseValues = sparseEmbedding[0].map((v) => v.score)
 
-    console.log(denseEmbedding)
-    console.log(sparseEmbedding)
-
     // TODO: Implement actual search logic
     // 1. Generate embeddings for the query
     // 2. Build Qdrant filter based on filters param

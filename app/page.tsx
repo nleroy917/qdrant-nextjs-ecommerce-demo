@@ -21,7 +21,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col gap-6 p-4">
-      <div className="flex flex-row items-center justify-center w-full max-w-2xl mx-auto">
+      <div className="flex flex-row items-center max-w-225">
         <SearchBar />
       </div>
 
