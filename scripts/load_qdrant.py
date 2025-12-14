@@ -1,16 +1,16 @@
 import polars as pl
 import base64
 
-from sentence_transformers import SentenceTransformer
+from sentence_transformers import SentenceTransformer, SparseEncoder
 from fastembed import TextEmbedding, SparseTextEmbedding
 from qdrant_client import QdrantClient, models
 
 client = QdrantClient(url="http://localhost:6333")
 
 # dense_model = TextEmbedding("BAAI/bge-small-en-v1.5")
-# sparse_model = SparseTextEmbedding("naver/splade-v3")
+# sparse_model = SparseTextEmbedding("prithivida/Splade_PP_en_v1")
 dense_model = SentenceTransformer("BAAI/bge-small-en-v1.5", device="mps")
-sparse_model = SentenceTransformer("naver/splade-v3", device="mps")
+sparse_model = SparseEncoder("prithivida/Splade_PP_en_v1", device="cpu")
 
 df = pl.read_parquet('hf://datasets/rajuptvs/ecommerce_products_clip/data/train-00000-of-00001-1f042f20fd269c32.parquet')
 
@@ -74,6 +74,7 @@ sparse_embeddings = sparse_model.encode(
 )
 
 
+
 if not client.collection_exists("products"):
     client.create_collection(
         collection_name="products",
@@ -97,8 +98,8 @@ def generate_points_in_batches(
                 vector={
                     "dense": dense_embeddings[idx].tolist(),
                     "sparse": models.SparseVector(
-                        indices=sparse_embeddings[idx].nonzero()[0].tolist(),
-                        values=sparse_embeddings[idx][sparse_embeddings[idx].nonzero()[0]].tolist()
+                        indices=sparse_embeddings[idx].coalesce().indices()[0],
+                        values=sparse_embeddings[idx].coalesce().values()
                     )
                 },
                 payload=row
@@ -112,3 +113,4 @@ for batch in generate_points_in_batches():
         collection_name="products",
         points=batch
     )
+

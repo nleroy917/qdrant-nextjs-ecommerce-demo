@@ -1,7 +1,14 @@
-import type { NextConfig } from "next";
+import path from 'path'
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  // Ensure these packages are not bundled on the server (works with Turbopack)
+  outputFileTracingRoot: path.join(__dirname, '../'),
+  serverExternalPackages: [
+    'onnxruntime-node',
+    'fastembed',
+    '@anush008/tokenizers',
+  ],
+}
 
-export default nextConfig;
+export default nextConfig

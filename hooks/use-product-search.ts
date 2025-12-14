@@ -1,9 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { SearchParams, Product } from '@/app/api/search/route'
 
+interface SearchResults {
+  points: Product[]
+}
+
 interface SearchResponse {
   success: boolean
-  results: Product[]
+  results: SearchResults
   count: number
   query: string
   filters?: SearchParams['filters']
@@ -26,7 +30,10 @@ async function searchProducts(params: SearchParams): Promise<SearchResponse> {
   return response.json()
 }
 
-export function useProductSearch(params: SearchParams, enabled: boolean = true) {
+export function useProductSearch(
+  params: SearchParams,
+  enabled: boolean = true
+) {
   return useQuery({
     queryKey: ['products', 'search', params],
     queryFn: () => searchProducts(params),

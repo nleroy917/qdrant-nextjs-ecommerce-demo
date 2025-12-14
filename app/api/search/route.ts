@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { QdrantClient } from '@qdrant/js-client-rest'
+import {
+  FlagEmbedding,
+  SparseTextEmbedding,
+  EmbeddingModel,
+  SparseEmbeddingModel,
+} from 'fastembed'
 
 const client = new QdrantClient({
   url: process.env.QDRANT_URL || 'http://localhost:6333',
@@ -16,8 +22,7 @@ export interface SearchParams {
   limit?: number
 }
 
-export interface Product {
-  id: string | number
+export interface ProductPayload {
   Product_name: string
   Price_corrected: number
   colors: string
@@ -26,6 +31,11 @@ export interface Product {
   Gender: string
   image_base64?: string
   image_filename?: string
+}
+
+export interface Product {
+  id: string | number
+  payload: ProductPayload
   score?: number
 }
 
@@ -33,6 +43,25 @@ export async function POST(request: NextRequest) {
   try {
     const body: SearchParams = await request.json()
     const { query: queryText, filters } = body
+
+    const denseModel = await FlagEmbedding.init({
+      model: EmbeddingModel.BGESmallENV15,
+    })
+    const sparseModel = await SparseTextEmbedding.init({
+      model: SparseEmbeddingModel.SpladePPEnV1,
+    })
+
+    const denseEmbedding = (await denseModel.embed(['This is a test']).next())
+      .value!
+
+    const sparseEmbedding = (await sparseModel.embed(['This is a test']).next())
+      .value!
+
+    const sparseIndices = sparseEmbedding[0].map((v) => v.tokenId)
+    const sparseValues = sparseEmbedding[0].map((v) => v.score)
+
+    console.log(denseEmbedding)
+    console.log(sparseEmbedding)
 
     // TODO: Implement actual search logic
     // 1. Generate embeddings for the query
@@ -42,23 +71,24 @@ export async function POST(request: NextRequest) {
     const results = await client.query('products', {
       prefetch: [
         {
-          query: {
-            text: queryText,
-            model: 'BAAI/bge-small-en-v1.5',
-          },
+          query: Array.from(denseEmbedding[0]),
           using: 'dense',
+          limit: 50,
         },
         {
           query: {
-            text: queryText,
-            model: 'prithivida/Splade-PP-en-v1',
+            values: sparseValues,
+            indices: sparseIndices,
           },
           using: 'sparse',
+          limit: 50,
         },
       ],
       query: {
         fusion: 'rrf',
       },
+      with_payload: true,
+      limit: 50,
     })
 
     return NextResponse.json({
