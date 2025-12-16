@@ -2,7 +2,7 @@ import polars as pl
 import base64
 
 from sentence_transformers import SentenceTransformer, SparseEncoder
-from fastembed import TextEmbedding, SparseTextEmbedding
+# from fastembed import TextEmbedding, SparseTextEmbedding
 from qdrant_client import QdrantClient, models
 
 client = QdrantClient(url="http://localhost:6333")
@@ -72,8 +72,6 @@ sparse_embeddings = sparse_model.encode(
     df['text_to_embed'].to_list(),
     show_progress_bar=True
 )
-
-
 
 if not client.collection_exists("products"):
     client.create_collection(
