@@ -14,7 +14,7 @@ from tqdm import tqdm
 import mimetypes
 
 # configuration
-BUCKET_NAME = "my-ecommerce-product-images"  # must match terraform bucket_name
+BUCKET_NAME = "qdrant-nextjs-demo-product-images"  # must match terraform bucket_name
 MAX_WORKERS = 20  # number of parallel upload threads (adjust based on your connection)
 S3_PREFIX = "images/"  # prefix/folder in S3 where images will be stored
 
@@ -166,6 +166,8 @@ def upload_images_parallel(images: List[Tuple[str, str]], max_workers: int = MAX
 
 
 def main():
+    global BUCKET_NAME, MAX_WORKERS, S3_PREFIX
+
     import argparse
 
     parser = argparse.ArgumentParser(description='Upload images from zip to S3')
@@ -178,7 +180,6 @@ def main():
     args = parser.parse_args()
 
     # update globals from args
-    global BUCKET_NAME, MAX_WORKERS, S3_PREFIX
     BUCKET_NAME = args.bucket
     MAX_WORKERS = args.workers
     S3_PREFIX = args.prefix
