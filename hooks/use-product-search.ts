@@ -12,6 +12,7 @@ interface SearchResponse {
   query: string
   filters?: SearchParams['filters']
   error?: string
+  durationMs: number
 }
 
 async function searchProducts(params: SearchParams): Promise<SearchResponse> {

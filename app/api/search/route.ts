@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { QdrantClient } from '@qdrant/js-client-rest'
-import {
-  FlagEmbedding,
-  SparseTextEmbedding,
-  EmbeddingModel,
-  SparseEmbeddingModel,
-} from 'fastembed'
+
+import { denseModel } from '@/lib/models/dense'
+import { sparseModel } from '@/lib/models/sparse'
 
 const client = new QdrantClient({
   url: process.env.QDRANT_URL || 'http://localhost:6333',
@@ -41,21 +38,23 @@ export interface Product {
 
 export async function POST(request: NextRequest) {
   try {
+    const timings: Record<string, number> = {}
+    const startTime = performance.now()
+
+    const parseStart = performance.now()
     const body: SearchParams = await request.json()
     const { query: queryText, filters } = body
+    timings.parsing = Math.round(performance.now() - parseStart)
 
-    const denseModel = await FlagEmbedding.init({
-      model: EmbeddingModel.BGESmallENV15,
-    })
-    const sparseModel = await SparseTextEmbedding.init({
-      model: SparseEmbeddingModel.SpladePPEnV1,
-    })
-
+    const denseStart = performance.now()
     const denseEmbedding = (await denseModel.embed(['This is a test']).next())
       .value!
+    timings.denseEmbedding = Math.round(performance.now() - denseStart)
 
+    const sparseStart = performance.now()
     const sparseEmbedding = (await sparseModel.embed(['This is a test']).next())
       .value!
+    timings.sparseEmbedding = Math.round(performance.now() - sparseStart)
 
     const sparseIndices = sparseEmbedding[0].indices
     const sparseValues = sparseEmbedding[0].values
@@ -65,6 +64,7 @@ export async function POST(request: NextRequest) {
     // 2. Build Qdrant filter based on filters param
     // 3. Search Qdrant collection
     // 4. Return results
+    const queryStart = performance.now()
     const results = await client.query('products', {
       prefetch: [
         {
@@ -87,6 +87,17 @@ export async function POST(request: NextRequest) {
       with_payload: true,
       limit: 50,
     })
+    timings.qdrantQuery = Math.round(performance.now() - queryStart)
+
+    const endTime = performance.now()
+    const durationMs = Math.round(endTime - startTime)
+    timings.total = durationMs
+
+    console.log('Search timings:', {
+      query: queryText,
+      timings,
+      breakdown: `parsing: ${timings.parsing}ms, dense: ${timings.denseEmbedding}ms, sparse: ${timings.sparseEmbedding}ms, qdrant: ${timings.qdrantQuery}ms, total: ${timings.total}ms`,
+    })
 
     return NextResponse.json({
       success: true,
@@ -94,6 +105,8 @@ export async function POST(request: NextRequest) {
       count: results.points.length,
       query: queryText,
       filters,
+      durationMs,
+      timings,
     })
   } catch (error) {
     console.error('Search error:', error)

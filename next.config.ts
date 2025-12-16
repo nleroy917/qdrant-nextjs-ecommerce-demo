@@ -9,6 +9,15 @@ const nextConfig: NextConfig = {
     'fastembed',
     '@anush008/tokenizers',
   ],
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname:
+          'qdrant-nextjs-demo-product-images.s3.us-east-1.amazonaws.com',
+      },
+    ],
+  },
 }
 
 export default nextConfig

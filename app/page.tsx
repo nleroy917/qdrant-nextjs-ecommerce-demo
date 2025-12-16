@@ -37,6 +37,7 @@ export default function Home() {
             <p className="text-sm text-muted-foreground">
               Found {data.count} {data.count === 1 ? 'result' : 'results'} for
               &quot;{data.query}&quot;
+              {data.durationMs !== undefined && ` in ${data.durationMs}ms`}
             </p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
