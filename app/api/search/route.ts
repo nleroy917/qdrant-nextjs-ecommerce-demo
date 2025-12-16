@@ -57,8 +57,8 @@ export async function POST(request: NextRequest) {
     const sparseEmbedding = (await sparseModel.embed(['This is a test']).next())
       .value!
 
-    const sparseIndices = sparseEmbedding[0].map((v) => v.tokenId)
-    const sparseValues = sparseEmbedding[0].map((v) => v.score)
+    const sparseIndices = sparseEmbedding[0].indices
+    const sparseValues = sparseEmbedding[0].values
 
     // TODO: Implement actual search logic
     // 1. Generate embeddings for the query
