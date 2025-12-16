@@ -1,5 +1,4 @@
 import polars as pl
-import base64
 
 from sentence_transformers import SentenceTransformer, SparseEncoder
 # from fastembed import TextEmbedding, SparseTextEmbedding
@@ -12,67 +11,7 @@ client = QdrantClient(url="http://localhost:6333")
 dense_model = SentenceTransformer("BAAI/bge-small-en-v1.5", device="mps")
 sparse_model = SparseEncoder("prithivida/Splade_PP_en_v1", device="cpu")
 
-df = pl.read_parquet('hf://datasets/rajuptvs/ecommerce_products_clip/data/train-00000-of-00001-1f042f20fd269c32.parquet')
-
-# simulate a more realistic price column (remove chars, shift, cast)
-df = df.with_columns(
-    (pl.col("Price").str
-    .replace(",", "").str
-    .slice(1)
-    .cast(pl.Int16) / pl.lit(10))
-    .round()
-    .cast(pl.Int16)
-    .alias("Price_corrected")
-)
-
-# derive the gender column
-df = df.with_columns(
-    pl.when(pl.col("Product_name").str.contains("Men"))
-    .then(pl.lit("Mens"))
-    .when(pl.col("Product_name").str.contains("Women"))
-    .then(pl.lit("Womens"))
-    .otherwise(pl.lit("Unisex"))
-    .alias("Gender")
-)
-
-# derive the column to embed
-df = df.with_columns(
-    pl.concat_str(
-        [
-            pl.col("Product_name"),
-            pl.col("Price"),
-            pl.col("colors"),
-            pl.col("Pattern"),
-            pl.col("Description"),
-            pl.col("Other Details"),
-            pl.col("Clipinfo")
-        ],
-        separator=" "
-    ).alias("text_to_embed")
-)
-
-# convert binary image data to base64 string for JSON serialization
-# The image column is a struct with bytes and path fields
-df = df.with_columns(
-    pl.col("image").struct.field("bytes").map_elements(
-        lambda img_bytes: base64.b64encode(img_bytes).decode('utf-8') if img_bytes else None,
-        return_dtype=pl.String
-    ).alias("image_base64"),
-    pl.col("image").struct.field("path").alias("image_filename")
-).drop("image")
-
-
-# dense_embeddings = list(dense_model.embed(df['text_to_embed'].to_list()))
-# sparse_embeddings = list(sparse_model.embed(df['text_to_embed'].to_list()))
-dense_embeddings = dense_model.encode(
-    df['text_to_embed'].to_list(),
-    show_progress_bar=True
-)
-sparse_embeddings = sparse_model.encode(
-    df['text_to_embed'].to_list(),
-    show_progress_bar=True
-)
-
+# create collection if not exists
 if not client.collection_exists("products"):
     client.create_collection(
         collection_name="products",
@@ -85,6 +24,12 @@ if not client.collection_exists("products"):
         sparse_vectors_config={"sparse": models.SparseVectorParams()},
     )
 
+df = pl.read_parquet("../hm_ecommerce_products_enriched.parquet")
+
+dense_embeddings = df['dense_embedding'].to_list()
+sparse_indices = df['sparse_indices'].to_list()
+sparse_values = df['sparse_values'].to_list()
+
 def generate_points_in_batches(
     batch_size: int = 128
 ):
@@ -94,10 +39,10 @@ def generate_points_in_batches(
             models.PointStruct(
                 id=idx,
                 vector={
-                    "dense": dense_embeddings[idx].tolist(),
+                    "dense": dense_embeddings[idx],
                     "sparse": models.SparseVector(
-                        indices=sparse_embeddings[idx].coalesce().indices()[0],
-                        values=sparse_embeddings[idx].coalesce().values()
+                        indices=sparse_indices[idx],
+                        values=sparse_values[idx]
                     )
                 },
                 payload=row
@@ -112,3 +57,32 @@ for batch in generate_points_in_batches():
         points=batch
     )
 
+# get collection info
+collection_info = client.get_collection("products")
+print("Collection info:")
+print(collection_info)
+
+
+# # Example: Add embeddings to the dataframe
+# df = df.with_columns([
+#     pl.Series("dense_embedding", [emb.tolist() for emb in dense_embeddings]),
+#     pl.Series("sparse_indices", [emb.coalesce().indices()[0].tolist() for emb in sparse_embeddings]),
+#     pl.Series("sparse_values", [emb.coalesce().values().tolist() for emb in sparse_embeddings]),
+# ])
+# # Count nulls and empty strings in the dataframe
+# null_counts = df.null_count()
+# print("Null counts per column:")
+# print(null_counts)
+
+# # Count empty strings in string columns
+# empty_counts = {}
+# for col in df.columns:
+#     if df[col].dtype == pl.Utf8:
+#         empty_counts[col] = (df[col] == "").sum()
+
+# print("\nEmpty string counts per column:")
+# for col, count in empty_counts.items():
+#     print(f"  {col}: {count}")
+
+# # drop nulls in detail_desc
+# df = df.filter(pl.col("detail_desc").is_not_null())

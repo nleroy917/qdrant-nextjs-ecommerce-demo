@@ -43,4 +43,6 @@ next-env.d.ts
 qdrant_storage/
 local_cache/
 
+# datasets
 articles.csv
+hm_ecommerce_products_enriched.parquet
