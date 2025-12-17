@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Qdrant Next.js E-commerce Demo
+
+A **completely Python-free (almost)** vector search demo for e-commerce, built to showcase local-first semantic search with modern web technologies.
+
+## Stack
+
+- **Next.js** + **shadcn/ui** for the frontend
+- **fastembed-js** for client-side embeddings
+- **Qdrant** (local instance) for vector storage and search
+- **100K e-commerce products** embedded with:
+  - SPLADEv1 (sparse vectors)
+  - bge-small-en-v1.5 (dense vectors)
+  - Link to dataset: [hm_ecommerce_products_100k](https://huggingface.co/datasets/nleroy917/hm_ecommerce_products)
 
 ## Getting Started
 
-First, run the development server:
+1. **Install dependencies**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+   ```bash
+   npm install
+   ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. **Start Qdrant locally**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+   ```bash
+   docker run -p 6333:6333 qdrant/qdrant:latest
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+3. **Run the development server**
 
-## Learn More
+   ```bash
+   npm run dev
+   ```
 
-To learn more about Next.js, take a look at the following resources:
+4. **Open the app**
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+   Navigate to [http://localhost:3000](http://localhost:3000)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Why This Demo?
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project demonstrates that you can build sophisticated vector search experiences entirely in JavaScript/TypeScript—no Python required. Everything from client-side embedding generation to semantic search runs in the browser and Node.js ecosystem.
