@@ -47,13 +47,11 @@ export async function POST(request: NextRequest) {
     timings.parsing = Math.round(performance.now() - parseStart)
 
     const denseStart = performance.now()
-    const denseEmbedding = (await denseModel.embed(['This is a test']).next())
-      .value!
+    const denseEmbedding = (await denseModel.embed([queryText]).next()).value!
     timings.denseEmbedding = Math.round(performance.now() - denseStart)
 
     const sparseStart = performance.now()
-    const sparseEmbedding = (await sparseModel.embed(['This is a test']).next())
-      .value!
+    const sparseEmbedding = (await sparseModel.embed([queryText]).next()).value!
     timings.sparseEmbedding = Math.round(performance.now() - sparseStart)
 
     const sparseIndices = sparseEmbedding[0].indices

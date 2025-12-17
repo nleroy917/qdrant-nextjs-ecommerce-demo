@@ -36,7 +36,7 @@ export function useProductSearch(
   enabled: boolean = true
 ) {
   return useQuery({
-    queryKey: ['products', 'search', params],
+    queryKey: ['products', 'search', params.query, params.filters, params.limit],
     queryFn: () => searchProducts(params),
     enabled,
     staleTime: 5 * 60 * 1000, // 5 minutes
