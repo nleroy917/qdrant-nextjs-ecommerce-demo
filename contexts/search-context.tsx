@@ -2,8 +2,8 @@
 
 import { createContext, useContext, useState, ReactNode } from 'react'
 
-export type ColorFilter = 'black' | 'white' | 'gray' | 'red' | 'green' | 'blue' | 'yellow' | 'purple' | 'pink'
-export type GenderFilter = 'mens' | 'womens' | 'all'
+export type ColorFilter = 'black' | 'white' | 'grey' | 'red' | 'orange' | 'yellow' | 'green' | 'blue' | 'turquoise' | 'purple' | 'pink' | 'beige' | 'brown' | 'gold' | 'silver' | 'bronze'
+export type GenderFilter = 'all' | 'divided' | 'ladieswear' | 'menswear' | 'baby-children' | 'sport'
 export type PriceRange = [number, number]
 
 export interface Filters {

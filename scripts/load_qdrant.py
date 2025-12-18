@@ -4,6 +4,8 @@ from sentence_transformers import SentenceTransformer, SparseEncoder
 # from fastembed import TextEmbedding, SparseTextEmbedding
 from qdrant_client import QdrantClient, models
 
+BATCH_SIZE = 128
+
 client = QdrantClient(url="http://localhost:6333")
 
 # dense_model = TextEmbedding("BAAI/bge-small-en-v1.5")
@@ -31,7 +33,7 @@ sparse_indices = df['sparse_indices'].to_list()
 sparse_values = df['sparse_values'].to_list()
 
 def generate_points_in_batches(
-    batch_size: int = 128
+    batch_size: int = BATCH_SIZE,
 ):
     for i in range(0, len(df), batch_size):
         batch = df[i:i + batch_size]
@@ -45,7 +47,17 @@ def generate_points_in_batches(
                         values=sparse_values[idx]
                     )
                 },
-                payload=row
+                payload={
+                    "product_code": row.get("product_code"),
+                    "prod_name": row.get("prod_name"),
+                    "product_group_name": row.get("product_group_name"),
+                    "colour_group_name": row.get("colour_group_name"),
+                    "department_name": row.get("department_name"),
+                    "section_name": row.get("section_name"),
+                    "garment_group_name": row.get("garment_group_name"),
+                    "detail_desc": row.get("detail_desc"),
+                    "image_url": row.get("image_url"),
+                }
             )
             for idx, row in enumerate(batch.iter_rows(named=True), start=i)
         ]

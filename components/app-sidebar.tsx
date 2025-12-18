@@ -13,19 +13,25 @@ import { Label } from '@/components/ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { DualRangeSlider } from './ui/dual-range-slider'
-import { useSearch, ColorFilter, PriceRange } from '@/contexts/search-context'
+import { useSearch, ColorFilter } from '@/contexts/search-context'
 
 const COLOR_OPTIONS: { value: ColorFilter; bgClass: string }[] = [
   { value: 'black', bgClass: 'bg-black' },
   { value: 'white', bgClass: 'bg-white' },
-  { value: 'gray', bgClass: 'bg-gray-400' },
-  { value: 'red', bgClass: 'bg-red-400' },
-  { value: 'green', bgClass: 'bg-green-400' },
-  { value: 'blue', bgClass: 'bg-blue-400' },
+  { value: 'grey', bgClass: 'bg-gray-400' },
+  { value: 'red', bgClass: 'bg-red-500' },
+  { value: 'orange', bgClass: 'bg-orange-500' },
   { value: 'yellow', bgClass: 'bg-yellow-400' },
-  { value: 'purple', bgClass: 'bg-purple-400' },
+  { value: 'green', bgClass: 'bg-green-500' },
+  { value: 'blue', bgClass: 'bg-blue-500' },
+  { value: 'turquoise', bgClass: 'bg-cyan-400' },
+  { value: 'purple', bgClass: 'bg-purple-500' },
   { value: 'pink', bgClass: 'bg-pink-400' },
+  { value: 'beige', bgClass: 'bg-amber-100' },
+  { value: 'brown', bgClass: 'bg-amber-800' },
+  { value: 'gold', bgClass: 'bg-yellow-600' },
+  { value: 'silver', bgClass: 'bg-gray-300' },
+  { value: 'bronze', bgClass: 'bg-amber-700' },
 ]
 
 export function AppSidebar() {
@@ -68,7 +74,7 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
         <SidebarGroup>
-          <SidebarGroupLabel>Gender</SidebarGroupLabel>
+          <SidebarGroupLabel>Category</SidebarGroupLabel>
           <SidebarGroupContent>
             <RadioGroup
               value={filters.gender}
@@ -78,21 +84,33 @@ export function AppSidebar() {
               className="ml-2"
             >
               <div className="flex items-center space-x-2">
-                <RadioGroupItem value="mens" id="mens" />
-                <Label htmlFor="mens">Mens</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="womens" id="womens" />
-                <Label htmlFor="womens">Womens</Label>
-              </div>
-              <div className="flex items-center space-x-2">
                 <RadioGroupItem value="all" id="all" />
                 <Label htmlFor="all">All</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="ladieswear" id="ladieswear" />
+                <Label htmlFor="ladieswear">Ladieswear</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="menswear" id="menswear" />
+                <Label htmlFor="menswear">Menswear</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="baby-children" id="baby-children" />
+                <Label htmlFor="baby-children">Baby/Children</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="divided" id="divided" />
+                <Label htmlFor="divided">Divided</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="sport" id="sport" />
+                <Label htmlFor="sport">Sport</Label>
               </div>
             </RadioGroup>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
+        {/* <SidebarGroup>
           <SidebarGroupLabel>Price</SidebarGroupLabel>
           <SidebarGroupContent>
             <DualRangeSlider
@@ -107,7 +125,7 @@ export function AppSidebar() {
               step={5}
             />
           </SidebarGroupContent>
-        </SidebarGroup>
+        </SidebarGroup> */}
         {hasActiveFilters && (
           <div className="px-4 mt-4">
             <Button

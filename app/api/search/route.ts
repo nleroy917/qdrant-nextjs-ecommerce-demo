@@ -41,10 +41,8 @@ export async function POST(request: NextRequest) {
     const timings: Record<string, number> = {}
     const startTime = performance.now()
 
-    const parseStart = performance.now()
     const body: SearchParams = await request.json()
     const { query: queryText, filters } = body
-    timings.parsing = Math.round(performance.now() - parseStart)
 
     const denseStart = performance.now()
     const denseEmbedding = (await denseModel.embed([queryText]).next()).value!
@@ -94,7 +92,7 @@ export async function POST(request: NextRequest) {
     console.log('Search timings:', {
       query: queryText,
       timings,
-      breakdown: `parsing: ${timings.parsing}ms, dense: ${timings.denseEmbedding}ms, sparse: ${timings.sparseEmbedding}ms, qdrant: ${timings.qdrantQuery}ms, total: ${timings.total}ms`,
+      breakdown: `dense: ${timings.denseEmbedding}ms, sparse: ${timings.sparseEmbedding}ms, qdrant: ${timings.qdrantQuery}ms, total: ${timings.total}ms`,
     })
 
     return NextResponse.json({
