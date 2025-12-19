@@ -1,12 +1,18 @@
+import os
+
 import polars as pl
 
 from sentence_transformers import SentenceTransformer, SparseEncoder
+from tqdm import tqdm
 # from fastembed import TextEmbedding, SparseTextEmbedding
 from qdrant_client import QdrantClient, models
 
 BATCH_SIZE = 128
 
-client = QdrantClient(url="http://localhost:6333")
+client = QdrantClient(
+    url=os.getenv("QDRANT_URL", "http://localhost:6333"),
+    api_key=os.getenv("QDRANT_API_KEY")
+)
 
 # dense_model = TextEmbedding("BAAI/bge-small-en-v1.5")
 # sparse_model = SparseTextEmbedding("prithivida/Splade_PP_en_v1")
@@ -63,7 +69,7 @@ def generate_points_in_batches(
         ]
         yield points
 
-for batch in generate_points_in_batches():
+for batch in tqdm(generate_points_in_batches(), total=(len(df) // BATCH_SIZE) + 1):
     client.upload_points(
         collection_name="products",
         points=batch
