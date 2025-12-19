@@ -23,6 +23,7 @@
     "@uidotdev/usehooks": "^2.4.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "fastembed": "github:nleroy917/fastembed-js",
     "lucide-react": "^0.561.0",
     "next": "16.0.10",
     "onnxruntime-node": "^1.21.0",
